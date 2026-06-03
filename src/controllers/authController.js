@@ -10,8 +10,8 @@ const register = async (req, res) => {
     }
 
     const userRole = role || "passenger";
-    if (!["passenger", "driver"].includes(userRole)) {
-      return res.status(400).json({ error: "Role must be passenger or driver" });
+    if (!["passenger", "driver", "admin"].includes(userRole)) {
+      return res.status(400).json({ error: "Role must be passenger, driver or admin" });
     }
 
     const user = await userModel.register(name, email, phone, password, userRole);
