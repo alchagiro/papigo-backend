@@ -1,0 +1,21 @@
+# render.yaml - Render Blueprint
+# Deploys backend automatically on Render
+
+services:
+  - type: web
+    name: papigo-api
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 10000
