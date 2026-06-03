@@ -275,7 +275,7 @@ const getDashboardStats = async (req, res) => {
          FROM trips t
          JOIN users u ON t.driver_id = u.id
          WHERE t.status = 'completed'
-         GROUP BY t.driver_id
+         GROUP BY u.name, t.driver_id
          ORDER BY earnings DESC
          LIMIT 5`,
         [],
@@ -292,7 +292,7 @@ const getDashboardStats = async (req, res) => {
          FROM trips t
          JOIN users u ON t.passenger_id = u.id
          WHERE t.status = 'completed'
-         GROUP BY t.passenger_id
+         GROUP BY u.name, t.passenger_id
          ORDER BY trips DESC
          LIMIT 5`,
         [],
