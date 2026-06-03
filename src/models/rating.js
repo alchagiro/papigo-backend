@@ -12,10 +12,11 @@ const createRating = async (tripId, raterId, ratedId, rating, comment) => {
       function (err) {
         if (err) return reject(err);
 
-        const targetUser = db.prepare("SELECT role FROM users WHERE id = ?").get(ratedId);
-        if (targetUser?.role === "driver") {
-          driverModel.updateDriverRating(ratedId, rating);
-        }
+        db.get("SELECT role FROM users WHERE id = ?", [ratedId], (err2, targetUser) => {
+          if (!err2 && targetUser?.role === "driver") {
+            driverModel.updateDriverRating(ratedId, rating);
+          }
+        });
 
         resolve({ id, tripId, raterId, ratedId, rating, comment });
       }
