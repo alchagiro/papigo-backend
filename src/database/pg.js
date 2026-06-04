@@ -39,14 +39,6 @@ const convertSqliteDateFunctions = (sql) => {
   return result;
 };
 
-const convertBooleanParams = (params) => {
-  if (!params || !Array.isArray(params)) return params;
-  return params.map((p) => {
-    if (typeof p === "number" && (p === 0 || p === 1)) return !!p;
-    return p;
-  });
-};
-
 const handleResult = (result, method) => {
   if (method === "run") return { changes: result.rowCount, lastID: null };
   if (method === "get") return result.rows[0] || null;
@@ -55,7 +47,7 @@ const handleResult = (result, method) => {
 
 const exec = (method, sql, params, callback) => {
   const convertedSql = convertSqliteDateFunctions(convertPlaceholders(sql));
-  pool.query(convertedSql, convertBooleanParams(params))
+  pool.query(convertedSql, params)
     .then((result) => {
       if (callback) callback(null, handleResult(result, method));
     })
