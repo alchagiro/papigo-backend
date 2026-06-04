@@ -148,9 +148,30 @@ const activateDriver = (userId) => {
 
 const deleteUser = (userId) => {
   return new Promise((resolve, reject) => {
-    db.run("DELETE FROM users WHERE id = ?", [userId], function (err) {
+    db.run("DELETE FROM driver_profiles WHERE user_id = ?", [userId], function (err) {
       if (err) return reject(err);
-      resolve({ id: userId, deleted: true });
+      db.run("DELETE FROM driver_locations WHERE driver_id = ?", [userId], function (err) {
+        if (err) return reject(err);
+        db.run("DELETE FROM daily_earnings WHERE driver_id = ?", [userId], function (err) {
+          if (err) return reject(err);
+          db.run("DELETE FROM platform_debts WHERE driver_id = ?", [userId], function (err) {
+            if (err) return reject(err);
+            db.run("DELETE FROM ratings WHERE rater_id = ? OR rated_id = ?", [userId, userId], function (err) {
+              if (err) return reject(err);
+              db.run("DELETE FROM bonuses WHERE passenger_id = ?", [userId], function (err) {
+                if (err) return reject(err);
+                db.run("DELETE FROM trips WHERE passenger_id = ? OR driver_id = ?", [userId, userId], function (err) {
+                  if (err) return reject(err);
+                  db.run("DELETE FROM users WHERE id = ?", [userId], function (err) {
+                    if (err) return reject(err);
+                    resolve({ id: userId, deleted: true });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
     });
   });
 };
