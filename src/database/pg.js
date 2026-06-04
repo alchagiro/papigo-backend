@@ -17,7 +17,13 @@ const convertSqliteDateFunctions = (sql) => {
     .replace(/date\('now'\s*,\s*'([^']+)'\s*\)/gi, (match, modifier) => {
       if (modifier.startsWith("-")) {
         const parts = modifier.split(" ");
-        return `CURRENT_DATE - INTERVAL '${parts[0]} ${parts[1]}'`;
+        const value = parts[0].replace(/^-/, "");
+        return `CURRENT_DATE - INTERVAL '${value} ${parts[1]}'`;
+      }
+      if (modifier.startsWith("+")) {
+        const parts = modifier.split(" ");
+        const value = parts[0].replace(/^\+/, "");
+        return `CURRENT_DATE + INTERVAL '${value} ${parts[1]}'`;
       }
       if (modifier === "start of month") {
         return "DATE_TRUNC('month', CURRENT_DATE)::date";
@@ -27,7 +33,13 @@ const convertSqliteDateFunctions = (sql) => {
     .replace(/date\('([^']+)'\s*,\s*'([^']+)'\s*\)/gi, (match, dateLiteral, modifier) => {
       if (modifier.startsWith("-")) {
         const parts = modifier.split(" ");
-        return `'${dateLiteral}'::date - INTERVAL '${parts[0]} ${parts[1]}'`;
+        const value = parts[0].replace(/^-/, "");
+        return `'${dateLiteral}'::date - INTERVAL '${value} ${parts[1]}'`;
+      }
+      if (modifier.startsWith("+")) {
+        const parts = modifier.split(" ");
+        const value = parts[0].replace(/^\+/, "");
+        return `'${dateLiteral}'::date + INTERVAL '${value} ${parts[1]}'`;
       }
       if (modifier === "start of month") {
         return `DATE_TRUNC('month', '${dateLiteral}'::date)::date`;
@@ -35,7 +47,8 @@ const convertSqliteDateFunctions = (sql) => {
       return match;
     })
     .replace(/DATE\('now'\)/gi, "CURRENT_DATE")
-    .replace(/date\('now'\)/gi, "CURRENT_DATE");
+    .replace(/date\('now'\)/gi, "CURRENT_DATE")
+    .replace(/DATE\((\w+)\)/gi, "$1::date");
   return result;
 };
 
