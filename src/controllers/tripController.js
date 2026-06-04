@@ -301,14 +301,17 @@ const calculateFare = async (req, res) => {
 
     let perKm;
     
+    let minFare;
     if (vehicleType === "motorcycle") {
       perKm = 700;
+      minFare = 5000;
     } else {
       perKm = 1250;
+      minFare = 7000;
     }
 
     const estimatedDuration = (distance / 30) * 60;
-    let fare = distance * perKm;
+    let fare = Math.max(distance * perKm, minFare);
 
     if (isOutsideCity(dropoffAddress) || isOutsideCity(pickupAddress)) {
       fare += INTERCITY_SURCHARGE;
