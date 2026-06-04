@@ -11,6 +11,11 @@ const isOutsideCity = (address) => {
   return OUTSIDE_CITIES.some(ciudad => address.toLowerCase().includes(ciudad));
 };
 
+const applyMinFare = (fare, vehicleType) => {
+  const minFare = vehicleType === "motorcycle" ? 5000 : 7000;
+  return Math.max(fare, minFare);
+};
+
 const requestTrip = async (req, res) => {
   try {
     console.log('Trip request body:', req.body);
@@ -21,10 +26,12 @@ const requestTrip = async (req, res) => {
       return res.status(400).json({ error: "Pickup and dropoff locations are required" });
     }
 
-    let finalFare = fare;
+    let finalFare = applyMinFare(fare || 0, vehicleType || "car");
+    let finalOfferedFare = offeredFare ? applyMinFare(offeredFare, vehicleType || "car") : null;
 
     if (isOutsideCity(dropoffAddress) || isOutsideCity(pickupAddress)) {
       finalFare = (finalFare || 0) + INTERCITY_SURCHARGE;
+      if (finalOfferedFare) finalOfferedFare += INTERCITY_SURCHARGE;
     }
     let bonusAmount = 0;
 
@@ -33,7 +40,7 @@ const requestTrip = async (req, res) => {
       if (bonus && bonus.passenger_id === req.user.id && !bonus.is_used) {
         bonusAmount = bonus.amount;
         await bonusModel.useBonus(bonusId, null);
-        finalFare = Math.max(0, (fare || 0) - bonusAmount);
+        finalFare = Math.max(0, finalFare - bonusAmount);
       }
     }
 
@@ -47,7 +54,7 @@ const requestTrip = async (req, res) => {
       dropoffAddress,
       paymentMethod || "cash",
       finalFare,
-      offeredFare || null,  // Pasajero pone su precio
+      finalOfferedFare,
       vehicleType || "car"
     );
 
@@ -77,7 +84,7 @@ const requestTrip = async (req, res) => {
           dropoffLng,
           dropoffAddress,
           fare: finalFare,
-          offeredFare: offeredFare || null,  // Enviar precio ofrecido al conductor
+          offeredFare: finalOfferedFare,
           vehicleType: vehicleType || "car",
           passengerId: req.user.id,
         });
@@ -409,11 +416,13 @@ const counterOffer = async (req, res) => {
       return res.status(400).json({ error: "Can only make counter-offer for accepted trips" });
     }
     
+    const finalCounterFare = applyMinFare(counterFare, trip.vehicle_type || "car");
+
     try {
       if (isDriver) {
-        await tripModel.updateTripOfferedFare(tripId, counterFare, 'driver');
+        await tripModel.updateTripOfferedFare(tripId, finalCounterFare, 'driver');
       } else {
-        await tripModel.updateTripOfferedFare(tripId, counterFare, 'passenger');
+        await tripModel.updateTripOfferedFare(tripId, finalCounterFare, 'passenger');
       }
     } catch (dbError) {
       console.error("Database error in counterOffer:", dbError);
