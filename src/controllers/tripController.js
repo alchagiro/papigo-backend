@@ -310,10 +310,10 @@ const calculateFare = async (req, res) => {
     
     let minFare;
     if (vehicleType === "motorcycle") {
-      perKm = 700;
+      perKm = 1500;
       minFare = 5000;
     } else {
-      perKm = 1250;
+      perKm = 2000;
       minFare = 7000;
     }
 
