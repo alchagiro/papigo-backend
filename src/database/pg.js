@@ -16,6 +16,10 @@ const convertPlaceholders = (sql) => {
   return sql.replace(/\?/g, () => `$${++idx}`);
 };
 
+const convertInsertIgnore = (sql) => {
+  return sql.replace(/INSERT\s+OR\s+IGNORE\s+(INTO\s+\w+\s*\([^)]*\)\s*VALUES\s*\([^)]*\))/gi, "INSERT $1 ON CONFLICT DO NOTHING");
+};
+
 const convertSqliteDateFunctions = (sql) => {
   let result = sql
     .replace(/date\('now'\s*,\s*'([^']+)'\s*\)/gi, (match, modifier) => {
@@ -63,7 +67,7 @@ const handleResult = (result, method) => {
 };
 
 const exec = (method, sql, params, callback) => {
-  const convertedSql = convertSqliteDateFunctions(convertPlaceholders(sql));
+  const convertedSql = convertInsertIgnore(convertSqliteDateFunctions(convertPlaceholders(sql)));
   pool.query(convertedSql, params)
     .then((result) => {
       if (callback) callback(null, handleResult(result, method));
