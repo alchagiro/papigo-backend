@@ -43,7 +43,7 @@ const findNearbyDrivers = (lat, lng, radius = 10, vehicleType = null) => {
       FROM driver_locations dl
       JOIN users u ON dl.driver_id = u.id
       JOIN driver_profiles dp ON u.id = dp.user_id
-      WHERE dp.is_active = 1
+      WHERE dp.is_active = TRUE
     `;
     
     const params = [lat, lng, lat];

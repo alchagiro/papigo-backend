@@ -41,7 +41,10 @@ const convertSqliteDateFunctions = (sql) => {
 
 const convertBooleanParams = (params) => {
   if (!params || !Array.isArray(params)) return params;
-  return params.map((p) => p);
+  return params.map((p) => {
+    if (typeof p === "number" && (p === 0 || p === 1)) return !!p;
+    return p;
+  });
 };
 
 const handleResult = (result, method) => {
@@ -52,7 +55,7 @@ const handleResult = (result, method) => {
 
 const exec = (method, sql, params, callback) => {
   const convertedSql = convertSqliteDateFunctions(convertPlaceholders(sql));
-  pool.query(convertedSql, params)
+  pool.query(convertedSql, convertBooleanParams(params))
     .then((result) => {
       if (callback) callback(null, handleResult(result, method));
     })

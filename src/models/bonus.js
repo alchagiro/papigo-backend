@@ -31,7 +31,7 @@ const getPassengerBonuses = (passengerId) => {
 const getActiveBonuses = (passengerId) => {
   return new Promise((resolve, reject) => {
     db.all(
-      "SELECT * FROM bonuses WHERE passenger_id = ? AND is_used = 0 ORDER BY amount DESC",
+      "SELECT * FROM bonuses WHERE passenger_id = ? AND is_used = FALSE ORDER BY amount DESC",
       [passengerId],
       (err, rows) => {
         if (err) return reject(err);
@@ -44,7 +44,7 @@ const getActiveBonuses = (passengerId) => {
 const useBonus = (bonusId, tripId) => {
   return new Promise((resolve, reject) => {
     db.run(
-      "UPDATE bonuses SET is_used = 1, used_trip_id = ?, used_at = CURRENT_TIMESTAMP WHERE id = ?",
+      "UPDATE bonuses SET is_used = TRUE, used_trip_id = ?, used_at = CURRENT_TIMESTAMP WHERE id = ?",
       [tripId, bonusId],
       function (err) {
         if (err) return reject(err);

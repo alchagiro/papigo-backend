@@ -24,7 +24,7 @@ const setDriverActive = (userId, isActive) => {
         // Si no existe, crear perfil
         db.run(
           "INSERT INTO driver_profiles (id, user_id, is_active) VALUES (?, ?, ?)",
-          [uuidv4(), userId, isActive ? 1 : 0],
+          [uuidv4(), userId, !!isActive],
           function (err) {
             if (err) return reject(err);
             resolve({ userId, isActive });
@@ -33,7 +33,7 @@ const setDriverActive = (userId, isActive) => {
       } else {
         db.run(
           "UPDATE driver_profiles SET is_active = ? WHERE user_id = ?",
-          [isActive ? 1 : 0, userId],
+          [!!isActive, userId],
           function (err) {
             if (err) return reject(err);
             resolve({ userId, isActive });
@@ -61,7 +61,7 @@ const getDriverProfile = (userId) => {
               phone: user?.phone,
               rating: 5.0,
               total_ratings: 0,
-              is_active: 0,
+              is_active: false,
               license_number: null,
               vehicle_type: null,
               vehicle_model: null,

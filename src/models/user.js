@@ -7,7 +7,7 @@ const register = (name, email, phone, password, role) => {
     const id = require("crypto").randomUUID();
     
     // Si es conductor, se registra como inactivo (requiere aprobacion)
-    const isActive = role === 'driver' ? 0 : 1;
+    const isActive = role !== 'driver';
     
     db.run(
       "INSERT INTO users (id, name, email, phone, password, role, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -110,7 +110,7 @@ const getUserWithTrips = (userId) => {
 const suspendUser = (userId, reason = "") => {
   return new Promise((resolve, reject) => {
     db.run(
-      "UPDATE users SET is_suspended = 1 WHERE id = ?",
+      "UPDATE users SET is_suspended = TRUE WHERE id = ?",
       [userId],
       function (err) {
         if (err) return reject(err);
@@ -123,7 +123,7 @@ const suspendUser = (userId, reason = "") => {
 const reactivateUser = (userId) => {
   return new Promise((resolve, reject) => {
     db.run(
-      "UPDATE users SET is_suspended = 0, is_active = 1 WHERE id = ?",
+      "UPDATE users SET is_suspended = FALSE, is_active = TRUE WHERE id = ?",
       [userId],
       function (err) {
         if (err) return reject(err);
@@ -136,7 +136,7 @@ const reactivateUser = (userId) => {
 const activateDriver = (userId) => {
   return new Promise((resolve, reject) => {
     db.run(
-      "UPDATE users SET is_active = 1 WHERE id = ? AND role = 'driver'",
+      "UPDATE users SET is_active = TRUE WHERE id = ? AND role = 'driver'",
       [userId],
       function (err) {
         if (err) return reject(err);
@@ -167,7 +167,7 @@ const isUserSuspended = (userId) => {
 const logoutUser = (userId) => {
   return new Promise((resolve, reject) => {
     db.run(
-      "UPDATE users SET is_active = 0 WHERE id = ?",
+      "UPDATE users SET is_active = FALSE WHERE id = ?",
       [userId],
       function (err) {
         if (err) return reject(err);

@@ -102,14 +102,14 @@ const activateDriverAccount = async (req, res) => {
     if (vehicleType && ['car', 'motorcycle'].includes(vehicleType)) {
       await new Promise((resolve, reject) => {
         db.run(
-          `INSERT OR IGNORE INTO driver_profiles (id, user_id, vehicle_type, is_active) 
-           VALUES (?, ?, ?, 1)`,
+           `INSERT OR IGNORE INTO driver_profiles (id, user_id, vehicle_type, is_active) 
+            VALUES (?, ?, ?, TRUE)`,
           [require("crypto").randomUUID(), userId, vehicleType],
           function (err) {
             if (err) return reject(err);
             // Si ya existía, actualizar
             db.run(
-              "UPDATE driver_profiles SET vehicle_type = ?, is_active = 1 WHERE user_id = ?",
+              "UPDATE driver_profiles SET vehicle_type = ?, is_active = TRUE WHERE user_id = ?",
               [vehicleType, userId],
               function (err2) {
                 if (err2) return reject(err2);
@@ -163,7 +163,7 @@ const createAdminUser = async (req, res) => {
     
     const hashedPassword = require("bcryptjs").hashSync(password, 10);
     const id = require("crypto").randomUUID();
-    const isActive = role === 'driver' ? 0 : 1;
+    const isActive = role !== 'driver';
     
     await new Promise((resolve, reject) => {
       db.run(
