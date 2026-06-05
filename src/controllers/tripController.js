@@ -4,7 +4,7 @@ const earningsModel = require("../models/earnings");
 const bonusModel = require("../models/bonus");
 
 const OUTSIDE_CITIES = ["palmira", "yumbo", "jamundi", "candelaria"];
-const INTERCITY_SURCHARGE = 20000;
+const INTERCITY_SURCHARGE = 0;
 
 const isOutsideCity = (address) => {
   if (!address) return false;
@@ -310,7 +310,7 @@ const calculateFare = async (req, res) => {
     
     let minFare;
     if (vehicleType === "motorcycle") {
-      perKm = 1500;
+      perKm = 1000;
       minFare = 5000;
     } else {
       perKm = 2000;
