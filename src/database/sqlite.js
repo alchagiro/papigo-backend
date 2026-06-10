@@ -34,12 +34,19 @@ const initDb = () => {
         vehicle_type TEXT,
         vehicle_model TEXT,
         vehicle_plate TEXT,
+        photo_url TEXT,
         rating REAL DEFAULT 5.0,
         total_ratings INTEGER DEFAULT 0,
         is_active BOOLEAN DEFAULT 1,
         FOREIGN KEY (user_id) REFERENCES users(id)
       )
     `);
+
+    db.run("ALTER TABLE driver_profiles ADD COLUMN photo_url TEXT", (err) => {
+      if (err && !err.message.includes("duplicate column")) {
+        console.error("Error adding photo_url column:", err.message);
+      }
+    });
 
     db.run(`
       CREATE TABLE IF NOT EXISTS trips (

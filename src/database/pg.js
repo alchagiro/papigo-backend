@@ -96,10 +96,12 @@ const initDb = async () => {
     CREATE TABLE IF NOT EXISTS driver_profiles (
       id TEXT PRIMARY KEY, user_id TEXT UNIQUE NOT NULL,
       license_number TEXT, vehicle_type TEXT, vehicle_model TEXT, vehicle_plate TEXT,
+      photo_url TEXT,
       rating DOUBLE PRECISION DEFAULT 5.0, total_ratings INTEGER DEFAULT 0,
       is_active BOOLEAN DEFAULT TRUE,
       FOREIGN KEY (user_id) REFERENCES users(id)
     );
+    ALTER TABLE driver_profiles ADD COLUMN IF NOT EXISTS photo_url TEXT;
     CREATE TABLE IF NOT EXISTS trips (
       id TEXT PRIMARY KEY, passenger_id TEXT NOT NULL, driver_id TEXT,
       pickup_lat DOUBLE PRECISION NOT NULL, pickup_lng DOUBLE PRECISION NOT NULL,

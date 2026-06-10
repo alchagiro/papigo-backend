@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/adminController");
 const { authenticate, authorizeRole } = require("../middleware/auth");
+const upload = require("../middleware/upload");
 
 router.use(authenticate);
 router.use(authorizeRole("admin"));
@@ -19,6 +20,8 @@ router.post("/users/delete", adminController.deleteUser);
 router.post("/users/activate-driver", adminController.activateDriverAccount);
 router.get("/users/:userId/trips", adminController.getUserTrips);
 router.get("/stats/dashboard", adminController.getDashboardStats);
+
+router.post("/drivers/:userId/photo", upload.single("photo"), adminController.uploadDriverPhoto);
 
 router.post("/bonuses", adminController.createBonus);
 router.get("/bonuses/:passengerId", adminController.getPassengerBonuses);

@@ -185,6 +185,29 @@ const createAdminUser = async (req, res) => {
   }
 };
 
+const uploadDriverPhoto = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    const photoUrl = `/uploads/drivers/${req.file.filename}`;
+    await new Promise((resolve, reject) => {
+      db.run(
+        "UPDATE driver_profiles SET photo_url = ? WHERE user_id = ?",
+        [photoUrl, userId],
+        function (err) {
+          if (err) return reject(err);
+          resolve();
+        }
+      );
+    });
+    res.json({ message: "Photo uploaded successfully", photo_url: photoUrl });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const getPassengerBonuses = async (req, res) => {
   try {
     const bonuses = await bonusModel.getPassengerBonuses(req.params.passengerId);
@@ -334,6 +357,7 @@ const getDashboardStats = async (req, res) => {
 };
 
 module.exports = {
+  uploadDriverPhoto,
   getAllDriverDebts,
   updatePlatformDebt,
   resetPlatformDebt,

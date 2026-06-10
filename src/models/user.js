@@ -65,7 +65,8 @@ const getAllUsers = (role = null) => {
       CASE WHEN u.role = 'driver' THEN (SELECT MAX(updated_at) FROM driver_locations WHERE driver_id = u.id) END as last_active,
       CASE WHEN u.role = 'driver' THEN (SELECT ROUND(AVG(rating), 1)::float8 FROM ratings WHERE rated_id = u.id) END as driver_rating,
       CASE WHEN u.role = 'driver' THEN (SELECT COUNT(*) FROM ratings WHERE rated_id = u.id) END as total_ratings,
-      CASE WHEN u.role = 'driver' THEN (SELECT vehicle_type FROM driver_profiles WHERE user_id = u.id) END as vehicle_type
+      CASE WHEN u.role = 'driver' THEN (SELECT vehicle_type FROM driver_profiles WHERE user_id = u.id) END as vehicle_type,
+      CASE WHEN u.role = 'driver' THEN (SELECT photo_url FROM driver_profiles WHERE user_id = u.id) END as photo_url
       FROM users u`;
 
     if (role) {

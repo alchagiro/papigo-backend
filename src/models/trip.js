@@ -34,7 +34,7 @@ const createTrip = async (
 const findNearbyDrivers = (lat, lng, radius = 10, vehicleType = null) => {
   return new Promise((resolve, reject) => {
     let query = `
-      SELECT dl.driver_id, u.name, dp.vehicle_type, dp.vehicle_model, dp.vehicle_plate, dp.rating,
+      SELECT dl.driver_id, u.name, dp.vehicle_type, dp.vehicle_model, dp.vehicle_plate, dp.rating, dp.photo_url as driver_photo_url,
         (6371 * ACOS(
           COS(RADIANS(?)) * COS(RADIANS(dl.lat)) * 
           COS(RADIANS(dl.lng) - RADIANS(?)) + 
@@ -137,7 +137,7 @@ const getTripHistory = (userId, role) => {
     const column = role === "passenger" ? "passenger_id" : "driver_id";
     const joinColumn = role === "passenger" ? "driver_id" : "passenger_id";
     db.all(
-      "SELECT t.*, u.name as other_name FROM trips t LEFT JOIN users u ON t." + joinColumn + " = u.id WHERE t." + column + " = ? ORDER BY t.created_at DESC",
+      "SELECT t.*, u.name as other_name, dp.photo_url as driver_photo_url FROM trips t LEFT JOIN users u ON t." + joinColumn + " = u.id LEFT JOIN driver_profiles dp ON t.driver_id = dp.user_id WHERE t." + column + " = ? ORDER BY t.created_at DESC",
       [userId],
       (err, trips) => {
         if (err) return reject(err);
@@ -163,7 +163,7 @@ const getDriverEarnings = (driverId) => {
 const getTripWithDetails = (id) => {
   return new Promise((resolve, reject) => {
     db.get(
-      "SELECT t.*, p.name as passenger_name, p.email as passenger_email, d.name as driver_name, d.email as driver_email FROM trips t JOIN users p ON t.passenger_id = p.id LEFT JOIN users d ON t.driver_id = d.id WHERE t.id = ?",
+      "SELECT t.*, p.name as passenger_name, p.email as passenger_email, d.name as driver_name, d.email as driver_email, dp.photo_url as driver_photo_url FROM trips t JOIN users p ON t.passenger_id = p.id LEFT JOIN users d ON t.driver_id = d.id LEFT JOIN driver_profiles dp ON d.id = dp.user_id WHERE t.id = ?",
       [id],
       (err, trip) => {
         if (err) return reject(err);
@@ -203,7 +203,7 @@ const updateTripBonus = (id, bonusAmount) => {
 const getUserTrips = (userId) => {
   return new Promise((resolve, reject) => {
     db.all(
-      "SELECT t.*, p.name as passenger_name, d.name as driver_name FROM trips t LEFT JOIN users p ON t.passenger_id = p.id LEFT JOIN users d ON t.driver_id = d.id WHERE t.passenger_id = ? OR t.driver_id = ? ORDER BY t.created_at DESC",
+      "SELECT t.*, p.name as passenger_name, d.name as driver_name, dp.photo_url as driver_photo_url FROM trips t LEFT JOIN users p ON t.passenger_id = p.id LEFT JOIN users d ON t.driver_id = d.id LEFT JOIN driver_profiles dp ON d.id = dp.user_id WHERE t.passenger_id = ? OR t.driver_id = ? ORDER BY t.created_at DESC",
       [userId, userId],
       (err, trips) => {
         if (err) return reject(err);

@@ -47,7 +47,7 @@ const setDriverActive = (userId, isActive) => {
 const getDriverProfile = (userId) => {
   return new Promise((resolve, reject) => {
     db.get(
-      "SELECT dp.*, u.name, u.email, u.phone FROM driver_profiles dp JOIN users u ON dp.user_id = u.id WHERE dp.user_id = ?",
+      "SELECT dp.*, u.name, u.email, u.phone, u.is_active as user_is_active FROM driver_profiles dp JOIN users u ON dp.user_id = u.id WHERE dp.user_id = ?",
       [userId],
       (err, profile) => {
         if (err) return reject(err);
@@ -66,6 +66,7 @@ const getDriverProfile = (userId) => {
               vehicle_type: null,
               vehicle_model: null,
               vehicle_plate: null,
+              photo_url: null,
             });
           });
         } else {
